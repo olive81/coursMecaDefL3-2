@@ -1,0 +1,243 @@
+\documentclass[%
+	final, %
+	 10pt, %
+ 	compress, % 
+hyperref={bookmarks=true}	
+]{beamer}
+
+\mode<presentation>
+\usetheme{Szeged}
+\usecolortheme{beaver}
+\usepackage{luatextra}
+\setmainfont{TeX Gyre Pagella}
+\usepackage{qtxmath}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{polyglossia}
+\setmainlanguage{french}
+\usepackage{morewrites}
+\usepackage[fixamsmath]{mathtools}
+\usepackage{cancel} 
+\usepackage{empheq}
+\usepackage{flexisym}
+\usepackage{breqn}
+\usepackage{numprint}
+\usepackage{tabu}
+\usepackage[version=3]{mhchem}
+\usepackage[french=guillemets*]{csquotes} 
+\MakeOuterQuote{"} 
+\frenchspacing
+ \usepackage[backend=biber,bibencoding=utf8,natbib=true,language=french,sortlocale=fr_FR,maxitems=3,hyperref=auto,useprefix=true,style=numeric,doi=false,isbn=false,backref=false,url=false,firstinits=true,sorting=none,clearlang=true,autolang=hyphen,defernumbers=true,citecounter=true,autocite=superscript]{biblatex}
+\DeclareRedundantLanguages{french}{french}
+\DeclareLanguageMapping{french}{french-apa}
+\usepackage{url}
+\usepackage[bookmarks=true]{hyperref}
+\hypersetup{  
+    breaklinks={true},
+    pdfpagemode=FullScreen,
+    pdftoolbar={true},
+    pdfmenubar=true, 
+    pdffitwindow=false,   
+    pdfstartview={FitH},
+    pdftitle={Cours de mécanique des fluides L3A},    % title
+    pdfauthor={Olivier Farges},     % author
+    pdfsubject={mecadefL3A},   % subject of the document
+    pdfcreator={Olivier Farges},   % creator of the document
+    pdfproducer={lualatex}, % producer of the document
+    pdfnewwindow=true,      % links in new window 
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=blue,          % color of internal links (change box color with linkbordercolor)
+    citecolor=green,        % color of links to bibliography
+    filecolor=magenta,      % color of file links
+    urlcolor=cyan           % color of external links
+}
+\usepackage{pgfplots}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usetikzlibrary{calc,arrows,chains,positioning,intersections,patterns,fadings,through,backgrounds,decorations.pathreplacing,3d,shapes}
+\usepackage{tikz-3dplot}
+\usepackage{tkz-euclide} 
+\usetkzobj{all}   
+\usepackage{relsize}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage[table-align-exponent=true]{siunitx}
+\usepackage{etex}
+\usepackage[absolute,overlay]{textpos}
+ \usepackage[
+     type={CC},
+     modifier={by-nc-sa},
+     version={3.0},
+ ]{doclicense}
+\usepackage{pythontex}
+\renewcommand{\v}[1]{\ensuremath{\bm{#1}}} % for vectors
+\newcommand{\ddr}[1]{\, \mathrm{d} #1} 
+\newcommand{\grad}[1]{\bm{grad} \, {#1}}
+\newcommand{\gradd}[1]{\overline{\overline{grad}} \, \bm{#1}}
+\newcommand{\diver}[1]{\textrm{div} \ {#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand\pgfmathsinandcos[3]{%
+  \pgfmathsetmacro#1{sin(#3)}%
+  \pgfmathsetmacro#2{cos(#3)}%
+}
+\newcommand\LongitudePlane[3][current plane]{%
+  \pgfmathsinandcos\sinEl\cosEl{#2} % elevation
+  \pgfmathsinandcos\sint\cost{#3} % azimuth
+  \tikzset{#1/.style={cm={\cost,\sint*\sinEl,0,\cosEl,(0,0)}}}
+}
+\newcommand\LatitudePlane[3][current plane]{%
+  \pgfmathsinandcos\sinEl\cosEl{#2} % elevation
+  \pgfmathsinandcos\sint\cost{#3} % latitude
+  \pgfmathsetmacro\yshift{\cosEl*\sint}
+  \tikzset{#1/.style={cm={\cost,0,0,\cost*\sinEl,(0,\yshift)}}} %
+}
+\newcommand\DrawLongitudeCircle[2][1]{
+  \LongitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+   % angle of "visibility"
+  \pgfmathsetmacro\angVis{atan(sin(#2)*cos(\angEl)/sin(\angEl))} %
+  \draw[current plane,thin,black] (\angVis:1) arc (\angVis:\angVis+180:1);
+  \draw[current plane,thin,dashed] (\angVis-180:1) arc (\angVis-180:\angVis:1);
+}%this is fake: for drawing the grid
+\newcommand\DrawLongitudeCirclered[2][1]{
+  \LongitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+   % angle of "visibility"
+  \pgfmathsetmacro\angVis{atan(sin(#2)*cos(\angEl)/sin(\angEl))} %
+  \draw[current plane,red,thick] (170:1) arc (170:180:1);
+  %\draw[current plane,dashed] (-50:1) arc (-50:-35:1);
+}%for drawing the grid
+\newcommand\DLongredd[2][1]{
+  \LongitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+   % angle of "visibility"
+  \pgfmathsetmacro\angVis{atan(sin(#2)*cos(\angEl)/sin(\angEl))} %
+  \draw[current plane,black,dashed, ultra thick] (150:1) arc (150:180:1);
+}
+\newcommand\DLatred[2][1]{
+  \LatitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+  \pgfmathsetmacro\sinVis{sin(#2)/cos(#2)*sin(\angEl)/cos(\angEl)}
+  % angle of "visibility"
+  \pgfmathsetmacro\angVis{asin(min(1,max(\sinVis,-1)))}
+  \draw[current plane,dashed,black,ultra thick] (-50:1) arc (-50:-35:1);
+
+}
+\newcommand\fillred[2][1]{
+  \LongitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+   % angle of "visibility"
+  \pgfmathsetmacro\angVis{atan(sin(#2)*cos(\angEl)/sin(\angEl))} %
+  \draw[current plane,red,thin] (\angVis:1) arc (\angVis:\angVis+180:1);
+
+}
+
+\newcommand\DrawLatitudeCircle[2][1]{
+  \LatitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+  \pgfmathsetmacro\sinVis{sin(#2)/cos(#2)*sin(\angEl)/cos(\angEl)}
+  % angle of "visibility"
+  \pgfmathsetmacro\angVis{asin(min(1,max(\sinVis,-1)))}
+  \draw[current plane,thin,black] (\angVis:1) arc (\angVis:-\angVis-180:1);
+  \draw[current plane,thin,dashed] (180-\angVis:1) arc (180-\angVis:\angVis:1);
+}%Defining functions to draw limited latitude circles (for the red mesh)
+\newcommand\DrawLatitudeCirclered[2][1]{
+  \LatitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+  \pgfmathsetmacro\sinVis{sin(#2)/cos(#2)*sin(\angEl)/cos(\angEl)}
+  % angle of "visibility"
+  \pgfmathsetmacro\angVis{asin(min(1,max(\sinVis,-1)))}
+  %\draw[current plane,red,thick] (-\angVis-50:1) arc (-\angVis-50:-\angVis-20:1);
+\draw[current plane,red,thick] (-45:1) arc (-45:-35:1);
+
+}
+
+\tikzset{%
+  >=latex,
+  inner sep=0pt,%
+  outer sep=2pt,%
+  mark coordinate/.style={inner sep=0pt,outer sep=0pt,minimum size=3pt,
+    fill=black,circle}%
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+ \title{Mécanique des fluides}
+  \author{\textsc{O.~Farges\inst{1}}}
+\institute{\tiny \inst{1}	Centre RAPSODEE, UMR CNRS 5302, École des Mines d'Albi-Carmaux, 81013 Albi Cedex 09, France}
+\subtitle{Cours 2}
+\date{\scriptsize \doclicenseThis}
+\logo{\includegraphics[height=.75cm]{MINES.eps}}
+
+ \AtBeginSection[]{
+ \begin{frame}
+  \begin{columns}[t]
+   \begin{column}{5cm}
+   \scriptsize{\tableofcontents[sections={2-4},currentsection,hideothersubsections]}%,hideallsubsections]}
+   \end{column}
+   \begin{column}{5cm}
+   \scriptsize{\tableofcontents[sections={5-9},currentsection,hideothersubsections]}%,hideallsubsections]}
+   \end{column}
+   \end{columns}
+ \end{frame}}
+
+
+
+\begin{document}
+
+\maketitle{}
+
+ \section*{Sommaire}
+ \begin{frame}
+  \begin{columns}[t]
+   \begin{column}{5cm}
+   \scriptsize{\tableofcontents[sections={2-4},currentsubsection,hideallsubsections]}
+   \end{column}
+   \begin{column}{5cm}   \scriptsize{\tableofcontents[sections={5-9},currentsubsection,hideallsubsections]}
+   \end{column}
+   \end{columns}
+ \end{frame}
+
+
+
+
+\section{Objectifs du cours}
+\label{sec:intr-au-cours}
+
+
+\begin{frame}\frametitle{Objectif du cours}
+Mettre en application les principes généraux de la mécanique des
+  fluides :
+\begin{itemize}
+\item connaître les principales classes d'écoulements 
+\item le modèle de fluide parfait et ses limites
+\end{itemize}
+\end{frame}
+
+
+\section{Introduction}
+\label{sec:introduction}
+
+\begin{frame}\frametitle{ }
+\begin{itemize}
+\item 
+\end{itemize}
+\end{frame}
+
+
+
+
+\end{document}
+
+%%% Local Variables:
+%%% coding: utf-8
+%%% mode: latex
+%%% TeX-engine: luatex
+%%% TeX-master: t
+%%% End:
