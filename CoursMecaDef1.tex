@@ -1,0 +1,1074 @@
+\documentclass[%
+	final, %
+	 10pt, %
+ 	compress, % 
+hyperref={bookmarks=true}	
+]{beamer}
+
+\mode<presentation>
+\usetheme{Szeged}
+\usecolortheme{beaver}
+\usepackage{luatextra}
+\setmainfont{TeX Gyre Pagella}
+\usepackage{qtxmath}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{polyglossia}
+\setmainlanguage{french}
+\usepackage{morewrites}
+\usepackage[fixamsmath]{mathtools}
+\usepackage{cancel} 
+\usepackage{empheq}
+\usepackage{flexisym}
+\usepackage{breqn}
+\usepackage{numprint}
+\usepackage{tabu}
+\usepackage[version=3]{mhchem}
+\usepackage[french=guillemets*]{csquotes} 
+\MakeOuterQuote{"} 
+\frenchspacing
+\usepackage[backend=biber,bibencoding=utf8,natbib=true,language=french,sortlocale=fr_FR,maxitems=3,hyperref=auto,useprefix=true,style=numeric,doi=false,isbn=false,backref=false,url=false,firstinits=true,sorting=none,clearlang=true,autolang=hyphen,defernumbers=true,citecounter=true,autocite=superscript]{biblatex}
+\DeclareRedundantLanguages{french}{french}
+\DeclareLanguageMapping{french}{french-apa}
+\usepackage{url}
+\usepackage[bookmarks=true]{hyperref}
+\hypersetup{  
+    breaklinks={true},
+    pdfpagemode=FullScreen,
+    pdftoolbar={true},
+    pdfmenubar=true, 
+    pdffitwindow=false,   
+    pdfstartview={FitH},
+    pdftitle={Cours de mécanique des fluides L3A},    % title
+    pdfauthor={Olivier Farges},     % author
+    pdfsubject={mecadefL3A},   % subject of the document
+    pdfcreator={Olivier Farges},   % creator of the document
+    pdfproducer={lualatex}, % producer of the document
+    pdfnewwindow=true,      % links in new window 
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=blue,          % color of internal links (change box color with linkbordercolor)
+    citecolor=green,        % color of links to bibliography
+    filecolor=magenta,      % color of file links
+    urlcolor=cyan           % color of external links
+}
+\usepackage{pgfplots}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usetikzlibrary{calc,arrows,chains,positioning,intersections,patterns,fadings,through,backgrounds,decorations.pathreplacing,3d,shapes}
+\usepackage{tikz-3dplot}
+\usepackage{tkz-euclide} 
+\usetkzobj{all}   
+\usepackage{relsize}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage[table-align-exponent=true]{siunitx}
+\usepackage{etex}
+\usepackage[absolute,overlay]{textpos}
+\usepackage[
+     type={CC},
+     modifier={by-nc-sa},
+     version={3.0},
+]{doclicense}
+\usepackage{pythontex}
+\renewcommand{\v}[1]{\ensuremath{\bm{#1}}} % for vectors
+\newcommand{\ddr}[1]{\, \mathrm{d} #1} 
+\newcommand{\grad}[1]{\bm{grad} \, {#1}}
+\newcommand{\gradd}[1]{\overline{\overline{grad}} \, \bm{#1}}
+\newcommand{\diver}[1]{\textrm{div} \ {#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand\pgfmathsinandcos[3]{%
+  \pgfmathsetmacro#1{sin(#3)}%
+  \pgfmathsetmacro#2{cos(#3)}%
+}
+\newcommand\LongitudePlane[3][current plane]{%
+  \pgfmathsinandcos\sinEl\cosEl{#2} % elevation
+  \pgfmathsinandcos\sint\cost{#3} % azimuth
+  \tikzset{#1/.style={cm={\cost,\sint*\sinEl,0,\cosEl,(0,0)}}}
+}
+\newcommand\LatitudePlane[3][current plane]{%
+  \pgfmathsinandcos\sinEl\cosEl{#2} % elevation
+  \pgfmathsinandcos\sint\cost{#3} % latitude
+  \pgfmathsetmacro\yshift{\cosEl*\sint}
+  \tikzset{#1/.style={cm={\cost,0,0,\cost*\sinEl,(0,\yshift)}}} %
+}
+\newcommand\DrawLongitudeCircle[2][1]{
+  \LongitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+   % angle of "visibility"
+  \pgfmathsetmacro\angVis{atan(sin(#2)*cos(\angEl)/sin(\angEl))} %
+  \draw[current plane,thin,black] (\angVis:1) arc (\angVis:\angVis+180:1);
+  \draw[current plane,thin,dashed] (\angVis-180:1) arc (\angVis-180:\angVis:1);
+}%this is fake: for drawing the grid
+\newcommand\DrawLongitudeCirclered[2][1]{
+  \LongitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+   % angle of "visibility"
+  \pgfmathsetmacro\angVis{atan(sin(#2)*cos(\angEl)/sin(\angEl))} %
+  \draw[current plane,red,thick] (170:1) arc (170:180:1);
+  %\draw[current plane,dashed] (-50:1) arc (-50:-35:1);
+}%for drawing the grid
+\newcommand\DLongredd[2][1]{
+  \LongitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+   % angle of "visibility"
+  \pgfmathsetmacro\angVis{atan(sin(#2)*cos(\angEl)/sin(\angEl))} %
+  \draw[current plane,black,dashed, ultra thick] (150:1) arc (150:180:1);
+}
+\newcommand\DLatred[2][1]{
+  \LatitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+  \pgfmathsetmacro\sinVis{sin(#2)/cos(#2)*sin(\angEl)/cos(\angEl)}
+  % angle of "visibility"
+  \pgfmathsetmacro\angVis{asin(min(1,max(\sinVis,-1)))}
+  \draw[current plane,dashed,black,ultra thick] (-50:1) arc (-50:-35:1);
+
+}
+\newcommand\fillred[2][1]{
+  \LongitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+   % angle of "visibility"
+  \pgfmathsetmacro\angVis{atan(sin(#2)*cos(\angEl)/sin(\angEl))} %
+  \draw[current plane,red,thin] (\angVis:1) arc (\angVis:\angVis+180:1);
+
+}
+
+\newcommand\DrawLatitudeCircle[2][1]{
+  \LatitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+  \pgfmathsetmacro\sinVis{sin(#2)/cos(#2)*sin(\angEl)/cos(\angEl)}
+  % angle of "visibility"
+  \pgfmathsetmacro\angVis{asin(min(1,max(\sinVis,-1)))}
+  \draw[current plane,thin,black] (\angVis:1) arc (\angVis:-\angVis-180:1);
+  \draw[current plane,thin,dashed] (180-\angVis:1) arc (180-\angVis:\angVis:1);
+}%Defining functions to draw limited latitude circles (for the red mesh)
+\newcommand\DrawLatitudeCirclered[2][1]{
+  \LatitudePlane{\angEl}{#2}
+  \tikzset{current plane/.prefix style={scale=#1}}
+  \pgfmathsetmacro\sinVis{sin(#2)/cos(#2)*sin(\angEl)/cos(\angEl)}
+  % angle of "visibility"
+  \pgfmathsetmacro\angVis{asin(min(1,max(\sinVis,-1)))}
+  %\draw[current plane,red,thick] (-\angVis-50:1) arc (-\angVis-50:-\angVis-20:1);
+\draw[current plane,red,thick] (-45:1) arc (-45:-35:1);
+
+}
+
+\tikzset{%
+  >=latex,
+  inner sep=0pt,%
+  outer sep=2pt,%
+  mark coordinate/.style={inner sep=0pt,outer sep=0pt,minimum size=3pt,
+    fill=black,circle}%
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+ \title{Mécanique des fluides}
+  \author{\textsc{O.~Farges\inst{1}}}
+\institute{\tiny \inst{1}	Centre RAPSODEE, UMR CNRS 5302, École des Mines d'Albi-Carmaux, 81013 Albi Cedex 09, France}
+\subtitle{Cours 1 : Généralités, hydrostatique}
+\date{\scriptsize \doclicenseThis}
+\logo{\includegraphics[height=.75cm]{MINES.eps}}
+
+ \AtBeginSection[]{
+ \begin{frame}
+  \begin{columns}[t]
+   \begin{column}{5cm}
+   \scriptsize{\tableofcontents[sections={2-4},currentsection,hideothersubsections]}%,hideallsubsections]}
+   \end{column}
+   \begin{column}{5cm}
+   \scriptsize{\tableofcontents[sections={5-9},currentsection,hideothersubsections]}%,hideallsubsections]}
+   \end{column}
+   \end{columns}
+ \end{frame}}
+
+
+
+\begin{document}
+
+\maketitle{}
+
+ \section*{Sommaire}
+ \begin{frame}
+  \begin{columns}[t]
+   \begin{column}{5cm}
+   \scriptsize{\tableofcontents[sections={2-4},currentsubsection,hideallsubsections]}
+   \end{column}
+   \begin{column}{5cm}   \scriptsize{\tableofcontents[sections={5-9},currentsubsection,hideallsubsections]}
+   \end{column}
+   \end{columns}
+ \end{frame}
+
+
+
+
+\section{Objectifs du cours}
+\label{sec:intr-au-cours}
+
+
+\begin{frame}\frametitle{Objectif du cours}
+Mettre en application les principes généraux de la mécanique des
+  fluides :
+
+\begin{itemize}
+\item connaître les principales classes d'écoulements 
+\item le modèle de fluide parfait et ses limites
+\end{itemize}
+
+\end{frame}
+
+
+\section{Introduction}
+\label{sec:introduction}
+
+
+
+
+\subsection{Définition d'un fluide}
+\label{sec:defin-dun-fluide}
+
+
+
+
+\begin{frame}\frametitle{Qu'est ce qu'un fluide ?}
+\begin{itemize}
+\item Un milieu indéfiniment déformable : pas de forme propre
+\item Se déplace et se déforme continuement tant qu'on applique une
+  contrainte
+\item Généralement répartis en gaz ou en liquide
+\item Limite fluide-solide parfois floue :
+\begin{itemize}
+\item dynamique de la sollicitation (sable mouillé, ...)
+\item états semi-ordonnés (cristaux liquides, ...)
+\item échelle de temps (glacier)
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{Exemples}
+\begin{itemize}
+\item Monophasiques : eau, air, huile, ...
+\item Multiphasiques : aérosols, émulsions, suspensions, ...
+\item \enquote{Complexes} : magma, plasmas, polymères, milieux
+  granulaires, ...
+\end{itemize}
+\end{frame}
+
+
+
+\subsection{Domaines d'application}
+\label{sec:doma-dappl}
+
+\begin{frame}\frametitle{Pourquoi étudier les fluides ?}
+\begin{itemize}
+\item \'{E}{}nergétique : fluides de transfert, combustion
+\item Transport de fluides : eau, gaz naturel
+\item Météorologie : étude des masses d'air, d'eau
+\item Biologie : sang,...
+\item Aéronautique : aérodynamique, motorisations, ...
+\item Agroalimentaire
+\item Pharmacie : réacteurs, ...
+\item et tout autre domaine du génie des procédés qui est confronté à un fluide !
+\end{itemize}
+\end{frame}
+
+
+\subsection{Caractéristiques d'un fluide}
+\label{sec:caracteristiques}
+
+
+\begin{frame}\frametitle{Différentes échelles d'observation}
+\begin{itemize}
+\item Micro :
+\begin{itemize}
+\item Atomes et molécules en interaction 
+\end{itemize}
+\item Méso : notion de particule de fluide
+\begin{itemize}
+\item Grand : beaucoup de molécules
+\item Petit : homogénéïté spatiale des propriétés physiques
+\end{itemize}
+\item Macro
+\begin{itemize}
+\item Milieu continu
+\item subit/exerce des forces par/sur son environnement 
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{Différentes échelles d'observation}
+\begin{figure}
+	\begin{tikzpicture}[scale=0.75,every node/.style={minimum size=1cm}]
+	%% some definitions
+	\tkzDefPoints{3.75/-1.5/a1,
+              4/1/a2,
+              1.25/-0.25/a3,
+              -1/-3/a4}
+
+
+
+
+	\def\R{4} % sphere radius
+
+	
+	\def\angEl{25} % elevation angle
+	\def\angAz{-100} % azimuth angle
+	\def\angPhiOne{-45} % longitude of point P
+	\def\angPhiTwo{-35} % longitude of point Q
+	\def\angBeta{10} % latitude of point P and Q
+	
+	%% working planes
+	
+	\pgfmathsetmacro\H{\R*cos(\angEl)} % distance to north pole
+	\LongitudePlane[xzplane]{\angEl}{\angAz}
+	\LongitudePlane[pzplane]{\angEl}{\angPhiOne}
+	\LongitudePlane[qzplane]{\angEl}{\angPhiTwo}
+	\LatitudePlane[equator]{\angEl}{0}
+	\fill[ball color=white!10] (0,0) circle (\R); % 3D lighting effect
+	\coordinate (O) at (0,0);
+	\coordinate[mark coordinate] (N) at (0,\H);
+	\coordinate[mark coordinate] (S) at (0,-\H);
+	\path[xzplane] (\R,0) coordinate (XE);
+	
+    %defining points outsided the area bounded by the sphere
+	\path[qzplane] (\angBeta:\R+5.2376) coordinate (XEd);
+	\path[pzplane] (\angBeta:\R) coordinate (P);%fino alla sfera
+	\path[pzplane] (\angBeta:\R+5.2376) coordinate (Pd);%sfora di una quantit pari a 10 dopo la sfera
+	\path[pzplane] (\angBeta:\R+5.2376) coordinate (Td);%sfora di una quantit pari a 10 dopo la sfera
+	\path[pzplane] (\R,0) coordinate (PE);
+    \path[pzplane] (\R+4,0) coordinate (PEd);
+	\path[qzplane] (\angBeta:\R) coordinate (Q);
+	\path[qzplane] (\angBeta:\R) coordinate (Qd);%sfora di una quantit pari a 10 dopo la sfera
+	
+	\path[qzplane] (\R,0) coordinate (QE);
+    \path[qzplane] (\R+4,0) coordinate (QEd);%sfora di una quantit 10 dalla sfera sul piano equat.
+
+
+    \DrawLongitudeCircle[\R]{\angPhiOne} % pzplane
+    \DrawLongitudeCircle[\R]{\angPhiTwo} % qzplane
+    \DrawLatitudeCircle[\R]{\angBeta}
+    \DrawLatitudeCircle[\R]{0} % equator
+	
+	\draw[-,dashed, thick] (N) -- (S);
+
+    %     		\path[xzplane] (0:\R) node[below] {$$};
+    %     \path[xzplane] (\angBeta:\R) node[below left] {$$};
+    % \foreach \t in {0,2,...,10} { \DrawLatitudeCirclered[\R]{\t} }
+    %     \foreach \t in {135,137,...,145} { \DrawLongitudeCirclered[\R]{\t} }
+	
+\begin{scope}[shift={(-2,-2,-2)}]
+    \draw[right color=gray!10, left color=black!80] (2.5,2.5,3) -- (2.5,3,3) -- (3,3,3) -- (3,2.5,3) -- cycle;
+   \draw[bottom color=gray!10, top color=black!80] (2.5,3,3) --
+   (2.5,3,2.5) --   (3,3,2.5) -- (3,3,3) -- cycle ;
+   \draw[left color=gray!10, right color=black!80] (3,2.5,2.5) --
+   (3,2.5,3)  -- (3,3,3)-- (3,3,2.5) -- cycle;
+\end{scope}
+%\tkzLabelPoint[above = 2pt  of a1, color = blue](a1){$dS$}
+%\tkzLabelPoint[above = 2pt  of a2, color = blue](a2){$S$}
+\tkzLabelPoint[above = 2pt  of a3, color = red](a3){$dV$}
+\tkzLabelPoint[above = 2pt  of a4, color = red](a4){$V$}
+    	
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}\frametitle{Milieu continu }
+\begin{itemize}
+\item Grandeur extensive $G(t)$ dans le volume $V$ $\rightarrow$ \textcolor{red}{GLOBALE}
+  (\textit{augmente avec le nombre de molécules})
+\item Grandeur volumique $g(x,y,z,t) = \dfrac{\ddr G}{\ddr V}$ $\ddr
+  V$ $\rightarrow$ $G(t) = \iiint\limits_{V} g \ddr V  $ $\rightarrow$
+  \textcolor{blue}{LOCALE}
+\item Exemples :
+\begin{itemize}
+\item Masse de fluide $M$ dans $V$ : ${\color{red} M(t)} = \iiint\limits_{V} \textcolor{blue}{\rho}
+  \ddr V$
+ \item Quantité de mouvement $\v{P}$ dans $V$ : ${\color{red}\v{P}(t)} = \iiint\limits_{V}
+   \textcolor{blue}{\rho \v{v}}   \ddr V$
+ \item Énergie cinétique $K$ dans $V$ : ${\color{red}K(t)} = \iiint\limits_{V}
+  \dfrac{1}{2}\textcolor{blue}{\rho v}^{2} \ddr V$
+ \item Énergie interne $U$ dans $V$ : ${\color{red}U(t)} = \iiint\limits_{V}
+   \textcolor{blue}{\rho u} \ddr V$
+ \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}\frametitle{La masse volumique}
+\begin{itemize}
+\item à priori non uniforme dans l'espace :
+\begin{itemize}
+\item Varie avec la temprérature $\Rightarrow$ dilatabilité
+\item Varie avec la pression $\Rightarrow$ compressibilité
+\end{itemize}
+\item Approximation bien utile : le fluide incompressible
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}\frametitle{Descriptions lagrangienne et eulérienne}
+\begin{description}
+\item[Lagrangienne] suivi des particules en fonction
+  de l'espace et du temps $\Rightarrow$ nécessite la connaissance de
+  la configuration initiale
+\item[Eulérienne] variations dans le temps des caractéristiques de
+  l'écoulement en des points fixes de l'espace   $\Rightarrow$ donne
+  accès à la répartition des vitesses et des températures dans le fluide
+\end{description}
+\end{frame}
+
+\begin{frame}\frametitle{Dérivée particulaire}
+\begin{itemize}
+\item scalaire : 
+\begin{dmath*}
+\dfrac{\ddr b}{ \ddr t} = \dfrac{\partial
+    b}{\partial t} + \v{v} \cdot \grad{b}
+\end{dmath*}
+\item fonction vectorielle : 
+\begin{dmath*}
+\dfrac{\ddr \v{b}}{ \ddr t} = \dfrac{\partial
+    \v{b}}{\partial t} + \left(\gradd{b} \cdot \v{v}\right) 
+\end{dmath*}
+\item intégrale triple : 
+\begin{dmath*}
+\dfrac{\ddr}{ \ddr t} \iiint_{V} f \ddr V \hiderel{=}
+  \iiint_{V} \left( \dfrac{\ddr f}{\ddr t} \hiderel{+} f \diver{\v{v}} \right)
+ \ddr V
+\end{dmath*}
+\begin{dmath*}
+\dfrac{\ddr}{ \ddr t} \iiint_{V} f \ddr V \hiderel{=} \iiint_{V} \left(  \dfrac{\partial f}{\partial t} \hiderel{+} \diver{( f \v{v})} \right)
+ \ddr V
+\end{dmath*}
+\end{itemize}
+\end{frame}
+
+\subsection{Quelques images}
+\label{sec:quelques-images}
+
+
+\begin{frame}\frametitle{}
+
+
+\begin{tikzpicture}
+\node[anchor=south west,inner sep=0pt] at (5,2) {\includegraphics[height=3cm]{images/Catarina.jpg}};
+\node[anchor=south west,inner sep=0pt] at (-1,2) {\includegraphics[height=3cm]{images/avion.jpg}};
+\node[anchor=south west,inner sep=0pt] at (5,6) {\includegraphics[height=3cm]{images/barnard.jpg}};
+\node[anchor=south west,inner sep=0pt] at (-1,6) {\includegraphics[height=3cm]{images/vonkarman.jpg}};
+\end{tikzpicture}
+\end{frame}
+
+
+
+\section{Cinématique des fluides}
+\label{sec:cinem-des-fluid}
+
+\begin{frame}\frametitle{Lignes de courant et trajectoires}
+\begin{description}
+\item [Lignes de courant :] Lignes du champ de vecteurs $\v{v}(\v{r},
+  t)$ tangentes en chaque point au vecteur vitesse
+  $\v{v}(x,y,z,t_{0})$ à un instant $t_{0}$
+\item[Trajectoire :] le chemin suivi par une particule au cours du temps 
+\end{description}
+La ligne de courant est relative à \emph{un même instant} et regroupe
+\emph{plusieurs particules}, la trajectoire se réfère à \emph{une seule particule}
+sur \emph{une période de temps}
+\end{frame}
+
+\begin{frame}\frametitle{Nombre de Reynolds}
+\begin{itemize}
+\item Nombre adimensionnel
+\item Rapport entre les effets d'inertie et les effets visqueux
+\item Permet de définir les effets dominants $\Rightarrow$ possibilité
+  de simplification
+\item Définit la limite entre écoulements laminaire et turbulent
+\end{itemize}
+\begin{dmath*}
+Re = \dfrac{\rho L v}{\mu} 
+\end{dmath*}
+\begin{dmath*}
+Re = \dfrac{\textcolor{red}{\rho v^{2} / L}}{\textcolor{blue}{\mu v /L}}
+\end{dmath*}
+\textcolor{red}{Transport convectif de quantité de mouvement}
+
+\textcolor{blue}{Transport diffusif de quantité de mouvement}
+\end{frame}
+
+
+\begin{frame}\frametitle{Ecoulements}
+\begin{itemize}
+\item $Re < 2000$ $\Rightarrow$ écoulement laminaire : vitesse
+  régulière dans le temps et l'espace
+\item $Re > 3000$ $\Rightarrow$ écoulement turbulent : vitesse
+  chaotique dans l'espace et le temps
+\item écoulement stationnaire ou permanent : dérivée partielle par
+  rapport au temps nulle $\Rightarrow$ dérivée particulaire limitée à
+  sa partie convective $\v{v} \cdot \grad{ }$
+\item écoulements bidimensionnels ou de révolution, écoulements irrotationnels
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}\frametitle{Débits $Q_{m}$ et $Q_{v}$}
+\begin{itemize}
+\item Débit massique : masse de matière traversant toute surface
+  pendant l'unité de temps 
+\begin{dmath*}
+Q_{m} = \iint_{S} \rho \v{v} \cdot \v{n} \ddr S
+\end{dmath*}
+\item Débit volumique : volume de matière  toute surface
+  pendant l'unité de temps 
+\begin{dmath*}
+Q_{v} = \dfrac{Q_{m}}{\rho} \hiderel{=} \iint_{S} \v{v} \cdot \v{n} \ddr S
+\end{dmath*}
+\item En régime stationnaire le débit massique se conserve
+\end{itemize}
+\end{frame}
+
+
+
+
+\section{Fluide et forces}
+\label{sec:fluide-et-forces}
+
+\begin{frame}\frametitle{Deux types de forces}
+\begin{figure}
+	\begin{tikzpicture}[scale=0.35,every node/.style={minimum size=1cm}]
+	%% some definitions
+	\tkzDefPoints{3.75/-1.5/a1,
+              4/1/a2,
+              1.25/-0.25/a3,
+              -1/-3/a4}
+	\def\R{4} % sphere radius
+	\def\angEl{25} % elevation angle
+	\def\angAz{-100} % azimuth angle
+	\def\angPhiOne{-45} % longitude of point P
+	\def\angPhiTwo{-35} % longitude of point Q
+	\def\angBeta{10} % latitude of point P and Q
+	\pgfmathsetmacro\H{\R*cos(\angEl)} % distance to north pole
+	\LongitudePlane[xzplane]{\angEl}{\angAz}
+	\LongitudePlane[pzplane]{\angEl}{\angPhiOne}
+	\LongitudePlane[qzplane]{\angEl}{\angPhiTwo}
+	\LatitudePlane[equator]{\angEl}{0}
+	\fill[ball color=white!10] (0,0) circle (\R); % 3D lighting effect
+	\coordinate (O) at (0,0);
+	\coordinate[mark coordinate] (N) at (0,\H);
+	\coordinate[mark coordinate] (S) at (0,-\H);
+	\path[xzplane] (\R,0) coordinate (XE);
+	\path[qzplane] (\angBeta:\R+5.2376) coordinate (XEd);
+	\path[pzplane] (\angBeta:\R) coordinate (P);%fino alla sfera
+	\path[pzplane] (\angBeta:\R+5.2376) coordinate (Pd);%sfora di una quantit pari a 10 dopo la sfera
+	\path[pzplane] (\angBeta:\R+5.2376) coordinate (Td);%sfora di una quantit pari a 10 dopo la sfera
+	\path[pzplane] (\R,0) coordinate (PE);
+    \path[pzplane] (\R+4,0) coordinate (PEd);
+	\path[qzplane] (\angBeta:\R) coordinate (Q);
+	\path[qzplane] (\angBeta:\R) coordinate (Qd);%sfora di una quantit pari a 10 dopo la sfera
+	\path[qzplane] (\R,0) coordinate (QE);
+    \path[qzplane] (\R+4,0) coordinate (QEd);%sfora di una quantit 10 dalla sfera sul piano equat.
+    \DrawLongitudeCircle[\R]{\angPhiOne} % pzplane
+    \DrawLongitudeCircle[\R]{\angPhiTwo} % qzplane
+    \DrawLatitudeCircle[\R]{\angBeta}
+    \DrawLatitudeCircle[\R]{0} % equator
+	\draw[-,dashed, thick] (N) -- (S);
+			\path[xzplane] (0:\R) node[below] {$$};
+	\path[xzplane] (\angBeta:\R) node[below left] {$$};
+    \foreach \t in {0,2,...,10} { \DrawLatitudeCirclered[\R]{\t} }
+	\foreach \t in {135,137,...,145} { \DrawLongitudeCirclered[\R]{\t} }
+\begin{scope}[shift={(-2,-2,-2)}]
+    \draw[right color=gray!10, left color=black!80] (2.5,2.5,3) -- (2.5,3,3) -- (3,3,3) -- (3,2.5,3) -- cycle;
+   \draw[bottom color=gray!10, top color=black!80] (2.5,3,3) --
+   (2.5,3,2.5) --   (3,3,2.5) -- (3,3,3) -- cycle ;
+   \draw[left color=gray!10, right color=black!80] (3,2.5,2.5) --
+   (3,2.5,3)  -- (3,3,3)-- (3,3,2.5) -- cycle;
+\end{scope}
+\tkzLabelPoint[above = 2pt  of a1, color = blue](a1){$dS$}
+\tkzLabelPoint[above = 2pt  of a2, color = blue](a2){$S$}
+\tkzLabelPoint[above = 2pt  of a3, color = red](a3){$dV$}
+\tkzLabelPoint[above = 2pt  of a4, color = red](a4){$V$}
+\end{tikzpicture}
+\end{figure}
+\begin{description}
+\item [Les forces volumiques] s'exercent sur chaque particule fluide
+  interne au volume $V$
+\item[Les forces surfaciques] s'exercent sur la
+  frontière $S$ du volume $V$
+\end{description}
+\end{frame}
+
+
+\subsection{Forces volumiques}
+\label{sec:forces-volumiques}
+
+\begin{frame}\frametitle{Efforts à distance}
+\begin{itemize}
+\item représentées par une densité massique de forces $\v{f}$
+\begin{dmath*}
+\v{F}_{V} = \iiint_{V} \rho \v{f} \ddr V
+\end{dmath*}
+\item La plus courante : la Force d'attraction gravitationnelle (le
+  poids)
+\item somme des poids élémentaires $\ddr m \v{g} = \rho \v{g} \ddr V $ de toutes les particules
+  fluides $\ddr V$
+\begin{dmath*}
+\v{P} = \iiint_{V} \rho \v{g} \ddr V
+\end{dmath*}
+\item Forces d'inertie (référentiel non galiléen)
+\item somme des forces d'inertie élémentaires $- \ddr m (\v{a}_{e} +
+  \v{a}_{c} ) = - \rho \ddr V  (\v{a}_{e} +
+  \v{a}_{c} )$ de toutes les particules fluides $\ddr V$
+\begin{dmath*}
+\v{F}_{ie} + \v{F}_{ic} = \iiint_{V} - \rho (\v{a}_{e} +
+  \v{a}_{c} )  \ddr V
+\end{dmath*}
+\item Forces électriques, magnétiques, ...
+\end{itemize}
+\end{frame}
+
+\subsection{Forces surfaciques}
+\label{sec:forces-surfaciques}
+
+\begin{frame}\frametitle{Forces de contact}
+\begin{itemize}
+\item Fluide au repos $\Rightarrow$ force normale à $\ddr S$ 
+\begin{dmath*}
+\v{F}_{p} = \iint_{S} -p  \v{n} \ddr S 
+\end{dmath*}
+\item pression, frottements visceux
+\end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{La pression}
+\begin{itemize}
+\item Pour un gaz elle est liée aux chocs entre molécules : échange de quantité de mouvement
+\item Pour un liquide également mais il y a des forces attractives et
+  des forces répulsives
+\begin{itemize}
+\item un liquide a une cohésion
+\item on peut \enquote{tirer dessus} sans le déchirer $\Rightarrow$
+  pressions négatives
+\item il peut s'accrocher et s'étaler à des solides $\Rightarrow$
+  capillarité, mouillage
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+
+
+\subsection{Hydrostatique}
+\label{sec:hydrostatique-1}
+
+
+
+\begin{frame}\frametitle{Fluide immobile}
+\begin{itemize}
+\item Équilibre entre les forces de pression et les forces volumiques
+\end{itemize}
+\begin{alertblock}{A RETENIR} 
+\begin{dmath*}
+\textcolor{red}{\v{F}_{P} + \v{P} = 0}
+\end{dmath*}
+\begin{dmath*}
+\textcolor{red}{\iint_{S} - p  \v{n} \ddr S +  \iiint_{V} \rho \v{g} \ddr V = 0}
+\end{dmath*}
+\end{alertblock}
+\end{frame}
+
+
+\begin{frame}\frametitle{Conséquences}
+\begin{dmath*}
+\grad{p} = \rho \v{g}
+\end{dmath*}
+\begin{itemize}
+\item Peut être intégrer $\Rightarrow$ champ de pression
+  $\v{p}(x,y,z)$ dans un fluide au repos
+\item CL : $p = p_{atm}$ sur la surface de contact avec l'air
+\item Les surfaces isobares sont perpendiculaires à $\v{g}$ 
+\item La pression augmente le long de $\v{g}$ (plongeur)
+\item En toute logique, elle diminue en sens inverse (cabines d'avion)
+\end{itemize}
+% \begin{alertblock}{A RETENIR} 
+% \begin{dmath*}
+% \textcolor{red}{\v{F}_{P} + \v{P} = 0
+% \iint_{S} - p  \v{n} \ddr S +  \iiint_{V} \rho \v{g} \ddr V = 0}
+% \end{dmath*}
+% \end{alertblock}
+\end{frame}
+
+
+
+
+% \begin{frame}\frametitle{}
+% \begin{center}
+% \begin{tikzpicture}
+% \tkzDefPoints{1.75/3.5/a1,
+%               4/2/a2,
+%               1.5/1.25/a3,
+%               3.5/2.5/a4}
+% \draw [thick,fill=gray!40] (2,4.5) ..controls +(-1,0) and
+% +(-1,1.5).. (1,1.5) ..controls +(0.7,-1) and +(0,-0.5).. (3,1)
+% ..controls +(0,2) and +(1,-1).. (4,3.5) ..controls +(-1,1) and
+% +(0.5,0).. (2,4.5);
+% \shade[yslant=-0.25, xslant= 0.5,top color=gray!10, bottom color=black!50]
+%     (0,4) rectangle +(0.5,0.5);
+% \begin{scope}[shift={(0.5,0,0)}]
+%     \draw[right color=gray!10, left color=black!80] (2.5,2.5,3) -- (2.5,3,3) -- (3,3,3) -- (3,2.5,3) -- cycle;
+%    \draw[bottom color=gray!10, top color=black!80] (2.5,3,3) --
+%    (2.5,3,2.5) --   (3,3,2.5) -- (3,3,3) -- cycle ;
+%    \draw[left color=gray!10, right color=black!80] (3,2.5,2.5) --
+%    (3,2.5,3)  -- (3,3,3)-- (3,3,2.5) -- cycle;
+% \end{scope}
+% \tkzLabelPoint[above = 2pt  of a1](a1){\small$dS$}
+% \tkzLabelPoint[above = 2pt  of a2](a2){\small$S$}
+% \tkzLabelPoint[above = 2pt  of a3](a3){\small$dV$}
+% \tkzLabelPoint[above = 2pt  of a4](a4){\small$V$}
+% \end{tikzpicture}
+% \end{center}
+% \end{frame}
+
+
+
+
+
+
+%\section{Hydrostatique}
+%\label{sec:hydrostatique}
+
+
+% \begin{frame}\frametitle{}
+% \begin{figure}
+% 	\begin{tikzpicture}[scale=0.5,every node/.style={minimum size=1cm}]
+% 	%% some definitions
+% 	\tkzDefPoints{3.75/-1.5/a1,
+%               4/1/a2,
+%               1.25/-0.25/a3,
+%               -1/-3/a4}
+
+
+
+
+% 	\def\R{4} % sphere radius
+
+	
+% 	\def\angEl{25} % elevation angle
+% 	\def\angAz{-100} % azimuth angle
+% 	\def\angPhiOne{-45} % longitude of point P
+% 	\def\angPhiTwo{-35} % longitude of point Q
+% 	\def\angBeta{10} % latitude of point P and Q
+	
+% 	%% working planes
+	
+% 	\pgfmathsetmacro\H{\R*cos(\angEl)} % distance to north pole
+% 	\LongitudePlane[xzplane]{\angEl}{\angAz}
+% 	\LongitudePlane[pzplane]{\angEl}{\angPhiOne}
+% 	\LongitudePlane[qzplane]{\angEl}{\angPhiTwo}
+% 	\LatitudePlane[equator]{\angEl}{0}
+% 	\fill[ball color=white!10] (0,0) circle (\R); % 3D lighting effect
+% 	\coordinate (O) at (0,0);
+% 	\coordinate[mark coordinate] (N) at (0,\H);
+% 	\coordinate[mark coordinate] (S) at (0,-\H);
+% 	\path[xzplane] (\R,0) coordinate (XE);
+	
+%     %defining points outsided the area bounded by the sphere
+% 	\path[qzplane] (\angBeta:\R+5.2376) coordinate (XEd);
+% 	\path[pzplane] (\angBeta:\R) coordinate (P);%fino alla sfera
+% 	\path[pzplane] (\angBeta:\R+5.2376) coordinate (Pd);%sfora di una quantit pari a 10 dopo la sfera
+% 	\path[pzplane] (\angBeta:\R+5.2376) coordinate (Td);%sfora di una quantit pari a 10 dopo la sfera
+% 	\path[pzplane] (\R,0) coordinate (PE);
+%     \path[pzplane] (\R+4,0) coordinate (PEd);
+% 	\path[qzplane] (\angBeta:\R) coordinate (Q);
+% 	\path[qzplane] (\angBeta:\R) coordinate (Qd);%sfora di una quantit pari a 10 dopo la sfera
+	
+% 	\path[qzplane] (\R,0) coordinate (QE);
+%     \path[qzplane] (\R+4,0) coordinate (QEd);%sfora di una quantit 10 dalla sfera sul piano equat.
+
+
+%     \DrawLongitudeCircle[\R]{\angPhiOne} % pzplane
+%     \DrawLongitudeCircle[\R]{\angPhiTwo} % qzplane
+%     \DrawLatitudeCircle[\R]{\angBeta}
+%     \DrawLatitudeCircle[\R]{0} % equator
+	
+% 	\draw[-,dashed, thick] (N) -- (S);
+
+% 			\path[xzplane] (0:\R) node[below] {$$};
+% 	\path[xzplane] (\angBeta:\R) node[below left] {$$};
+%     \foreach \t in {0,2,...,10} { \DrawLatitudeCirclered[\R]{\t} }
+% 	\foreach \t in {135,137,...,145} { \DrawLongitudeCirclered[\R]{\t} }
+	
+% \begin{scope}[shift={(-2,-2,-2)}]
+%     \draw[right color=gray!10, left color=black!80] (2.5,2.5,3) -- (2.5,3,3) -- (3,3,3) -- (3,2.5,3) -- cycle;
+%    \draw[bottom color=gray!10, top color=black!80] (2.5,3,3) --
+%    (2.5,3,2.5) --   (3,3,2.5) -- (3,3,3) -- cycle ;
+%    \draw[left color=gray!10, right color=black!80] (3,2.5,2.5) --
+%    (3,2.5,3)  -- (3,3,3)-- (3,3,2.5) -- cycle;
+% \end{scope}
+% \tkzLabelPoint[above = 2pt  of a1, color = blue](a1){$dS$}
+% \tkzLabelPoint[above = 2pt  of a2, color = blue](a2){$S$}
+% \tkzLabelPoint[above = 2pt  of a3, color = red](a3){$dV$}
+% \tkzLabelPoint[above = 2pt  of a4, color = red](a4){$V$}
+    	
+% \end{tikzpicture}
+% \end{figure}
+% \begin{itemize}
+% \item 
+% \end{itemize}
+% \end{frame}
+
+
+
+\section{Équations bilan}
+\label{sec:nombr-adim}
+
+
+\begin{frame}\frametitle{3 équations pour un fluide en mouvement}
+\begin{itemize}
+\item Conservation de la masse
+\item Conservation de la quantité de mouvement
+\item Conservation de l'énergie
+\end{itemize}
+\end{frame}
+
+\subsection{Conservation de la masse}
+\label{sec:conservation-de-la}
+
+
+
+
+
+\begin{frame}\frametitle{Conservation de la masse}
+\begin{dmath*}
+\dfrac{\partial \rho}{\partial t} + \diver{(\rho \v{v})} = 0
+\end{dmath*}
+\begin{itemize}
+\item Si l'écoulement des incompressible, $\rho = Cte$ dans le temps
+  et l'espace et l'on a simplement $\diver{(\v{v})} = 0$
+\end{itemize}
+\end{frame}
+
+
+\subsection{Conservation de la quantité de mouvement}
+\label{sec:conservation-de-la-1}
+
+% \begin{frame}\frametitle{Conservation de la quantité de mouvement}
+% \begin{dmath*}
+% \dfrac{\ddr}{\ddr t} 
+% \Biggl(
+%  \iiint _{V} \rho \v{v} \ddr V  \Biggr) =   \underbrace{\iiint_{V} \rho \v{f} \ddr
+%   V}_{\textcolor{blue}{\text{\scriptsize Forces Volumiques}}} +
+%  \underbrace{\iint_{S} \overline{\overline{\sigma}} \cdot \v{n} \ddr
+% S}_{\textcolor{blue}{\text{\scriptsize Forces Surfaciques}}}
+% \end{dmath*}
+% \end{frame}
+
+\begin{frame}\frametitle{Conservation de la quantité de mouvement}
+\begin{dmath*}
+\dfrac{\ddr}{\ddr t} 
+\Biggl(
+ \iiint _{V} \rho \v{v} \ddr V  \Biggr) =   \underbrace{\iiint_{V} \rho \v{f} \ddr
+  V}_{\textcolor{blue}{\text{\scriptsize Forces Volumiques}}} +
+ \underbrace{\iint_{S} \overline{\overline{\sigma}} \cdot \v{n} \ddr
+S}_{\textcolor{blue}{\text{\scriptsize Forces Surfaciques}}}
+\end{dmath*}
+\begin{dmath*}
+\rho \dfrac{\ddr  \v{v}}{\ddr t} = \rho \v{f} +
+\diver{\overline{\overline{\sigma}}}
+\end{dmath*}
+\begin{dmath*}
+\rho \dfrac{\partial  \v{v}}{\partial t} + \rho \left( \gradd{\v{v}}
+\right) \v{v} = \rho \v{f} - \grad{p} +
+\diver{\overline{\overline{\tau}}}
+\end{dmath*}
+\small
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+\item $\rho \dfrac{\partial  \v{v}}{\partial t}$ : terme
+  instantionnaire
+\item $\rho \left( \gradd{\v{v}}
+\right) \v{v}$ : terme d'advection
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+\item $\rho \v{f}$ : force volumique (poids)
+\item $- \grad{p}$ : force surfacique (pression)
+\item $\diver{\overline{\overline{\tau}}}$ : force surfacique (viscosité)
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+
+\subsection{Conservation de l'énergie}
+\label{sec:cons-de-lenerg}
+
+
+
+\begin{frame}\frametitle{Conservation de l'énergie}
+\begin{itemize}
+\item En toute généralité
+\end{itemize}
+\begin{dmath*}
+\rho \dfrac{\ddr  u}{\ddr t} = -p \diver{\v{v}} +
+\overline{\overline{\tau}} \hiderel{:} \gradd {v} - \diver{\v{q}} + P_{d} 
+\end{dmath*}
+{\small
+\begin{columns}
+\begin{column}{5cm}
+\begin{itemize}
+\item $\rho \dfrac{\ddr  u}{\ddr t}$ : taux de variation de l'énergie interne
+\item $p \diver{\v{v}}$ : puissance des forces de compression
+\end{itemize}
+\end{column}
+\begin{column}{5cm}
+\begin{itemize}
+\item $\overline{\overline{\tau}} : \gradd {v}$ : puissance des forces
+  visqueuses ($:  \Rightarrow$ double produit scalaire)
+\item $\diver{\v{q}}$ : flux de chaleur 
+\item $P_{d}$ : puissance dissipée
+\end{itemize}
+\end{column}
+\end{columns}}
+\begin{itemize}
+\item En ce qui nous concerne : écoulements incompressibles à faible vitesse
+\end{itemize}
+\begin{dmath*}
+\rho \dfrac{\ddr  u}{\ddr t} =  - \diver{\v{q}} + P_{d} 
+\end{dmath*}
+\end{frame}
+
+
+\section{Applications}
+\label{sec:applications}
+
+
+\subsection{La poussée d'Archimède}
+\label{sec:la-pouss-darch}
+
+
+\begin{frame}\frametitle{Tout corps plongé dans l'eau ...}
+\begin{alertblock}{énoncé}
+\enquote{\textit{Tout corps plongé dans un fluide au repos,
+    entièrement mouillé par celui-ci ou traversant sa surface libre,
+    subit une force verticale, dirigée de bas en haut et opposée au
+    poids du volume de fluide déplacé ; cette force est appelée
+    poussée d'Archimède. }}
+\end{alertblock}
+\end{frame}
+
+\begin{frame}\frametitle{Tout corps plongé dans l'eau ...}
+\begin{itemize}
+\item C'est simplement la résultante des forces de pression
+\item On cherche à connaître la force exercée par le fluide sur un
+  corps étranger
+\end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{Un corps dans un fluide statique}
+\begin{itemize}
+\item Le corps n'est pas en équilibre $\Rightarrow \v{P}_{corps} +
+  \v{F}_{p} \neq 0$
+\item 2 cas possibles
+\begin{itemize}
+\item Le corps monte : $\rho_{corps} < \rho_{fluide}$
+\item Le corps descend : $\rho_{corps} > \rho_{fluide}$
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{Moment des forces de pression}
+\begin{itemize}
+\item Utile pour les problèmes de stabilité, de rotation
+\item Le moment total en un point $A$ de la force de pression
+  $F_{p}$ est la somme des moments élémentaires
+\end{itemize}
+\begin{dmath*}
+M_{A} (F_{p}) = \iint_{S} AM \wedge \ddr F_{p}
+\end{dmath*}
+\begin{dmath*}
+M_{A} (F_{p}) = \iint_{S} AM \wedge \left( -p \v{n} \ddr S \right)
+\end{dmath*}
+\end{frame}
+
+\begin{frame}\frametitle{Centre de poussée}
+\begin{itemize}
+\item Appelé aussi centre de carène
+\item C'est le point $C$ tel que $M_{C} (\v{F}_{p}) = 0$
+\item C'est le centre de gravité du volume immergé
+\end{itemize}
+\end{frame}
+
+
+
+\section{Références}
+\label{sec:references}
+
+
+
+\begin{frame}\frametitle{}
+\begin{itemize}
+\item O. Louisnard, Cours de Mécanique des fluides, 25/09/2012
+  \textit{http://perso.mines-albi.fr/~louisnar/ENSEIGNEMENT/MECADEF/PolyMecaDef.pdf}
+\item R. Ansart, Mécanique des fluides et transferts, Cours de 1er
+  année formation apprentissage
+\item F. Veynandt, Mécanique des fluides
+\item M. Rl Hafi, Cours de Mécanique des fluides
+\end{itemize}
+\end{frame}
+
+
+
+
+
+
+
+% \begin{frame}[fragile]
+% \frametitle{Exemple de code 1}
+% \scriptsize
+% \begin{pyconsole}
+% from sympy import *
+% var("x, y")
+% z = (x + y)**3
+% z
+% expand(z)
+% latex(expand(z))
+% \end{pyconsole}
+% \end{frame}
+
+
+% \begin{frame}[fragile]
+% \frametitle{Exemple de code 2}
+% \tiny
+% \begin{pyconsole}
+% from pylab import * 
+% indepVars = arange(0, 5, 0.1) 
+% depVars = sin(indepVars) 
+% depVars_Error = 0.1*abs(randn(len(depVars)))
+% Fit_Coeffs = polyfit(indepVars, depVars, 2) 
+% depVars_Best_Fit = polyval(Fit_Coeffs, indepVars)
+% figure()
+% errorbar(indepVars, depVars, yerr=depVars_Error, fmt='o', label='experimental run 1') 
+% plot(indepVars, depVars_Best_Fit, label='best fit quadratic polynomial') 
+% xlabel('Independent Variable axis label (IV units)')
+% ylabel('Dependent Variable axis label (DV units)')
+% legend() 
+% title('Scatter plot with error bars')  
+% plt.savefig("fig2.png")
+% \end{pyconsole}
+% \end{frame}
+
+
+\end{document}
+
+%%% Local Variables:
+%%% coding: utf-8
+%%% mode: latex
+%%% TeX-engine: luatex
+%%% TeX-master: t
+%%% End:
