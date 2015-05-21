@@ -1,0 +1,1 @@
+Ce projet concerne une présentation pour un cours de Mécanique des Fluides pour les L3 apprentissage de l'école des mines d'Albi (année 2015). Il s'agit du cours 2 portant sur le théorème de Bernoulli
